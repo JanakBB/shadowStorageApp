@@ -10,11 +10,8 @@ export default function Register() {
     otp: "",
   });
 
-  // const [fullName, setFullName] = useState("");
-  // const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
-  console.log(step);
 
   function handleFullNameChange(e) {
     setFormData((prev) => ({ ...prev, fullName: e.target.value }));
@@ -29,20 +26,6 @@ export default function Register() {
   }
 
   async function handleSendOTP() {
-    // Before create Backend we can try this method for better looks.
-    // ---------------------------------------------
-    // const toastId = toast.loading("Sending OTP...");
-    // setLoading(true);
-    // setTimeout(() => {
-    //   toast.update(toastId, {
-    //     render: "OTP sent successfully! Check your email.",
-    //     type: "success",
-    //     isLoading: false,
-    //     autoClose: 3000,
-    //   });
-    //   setStep(2);
-    // }, 4000);
-
     // After create Backend we apply this for better looks.
     // ----------------------------------------------------
     if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
@@ -57,7 +40,7 @@ export default function Register() {
         render: "OTP sent successfully! Check your email.",
         type: "success",
         isLoading: false,
-        autoClose: 300,
+        autoClose: 3000,
       });
       setStep(2);
     } catch (error) {
