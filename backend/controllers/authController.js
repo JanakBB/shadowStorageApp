@@ -1,13 +1,24 @@
-export const sendOTP = async (req, res, next) => {
-  const email = req.body.email;
+import { sendOtpEmail } from "../services/sendOtpServer.js";
 
-  // 1.Its for first time check without resend.
-  // -----------------------------------------
-  setTimeout(() => {
+export const sendOTP = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    // await delay(3000);
+    // res.status(201).json({
+    //   success: true,
+    //   message: `Verification code sent to ${email}`,
+    //   otpId: "1234",
+    // });
+
+    const data = await sendOtpEmail(email);
     res.status(201).json({
       success: true,
       message: `Verification code sent to ${email}`,
-      otpId: "1234",
+      data,
     });
-  }, 3000);
+  } catch (error) {
+    next(error);
+  }
 };
