@@ -1,17 +1,19 @@
 import Header from "../component/Header.jsx";
 import { useState } from "react";
-import { sendOTP } from "../api/authApi.js";
+import { sendOTP, verifyOTP } from "../api/authApi.js";
 import { toast } from "react-toastify";
 
 export default function Register() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    otp: "",
+    password: "",
   });
 
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [passwordType, setPasswordType] = useState("password");
 
   function handleFullNameChange(e) {
     setFormData((prev) => ({ ...prev, fullName: e.target.value }));
@@ -21,8 +23,20 @@ export default function Register() {
     setFormData((prev) => ({ ...prev, email: e.target.value }));
   }
 
-  function handleVerifyOTP(e) {
-    setFormData((prev) => ({ ...prev, otp: e.target.value }));
+  function handleVerifyOTPChange(e) {
+    setOtp(e.target.value);
+  }
+
+  function handlePasswordChange(e) {
+    setFormData((prev) => ({ ...prev, password: e.target.value }));
+  }
+
+  function handlePasswordType() {
+    if (passwordType === "password") {
+      setPasswordType("text");
+    } else {
+      setPasswordType("password");
+    }
   }
 
   async function handleSendOTP() {
@@ -55,6 +69,34 @@ export default function Register() {
     }
   }
 
+  async function handleOTPVerify() {
+    if (otp.length !== 6) {
+      toast.error("Please enter OTP length exactly 6");
+      return;
+    }
+    const toastId = toast.loading("Verifying OTP...");
+    setLoading(true);
+    try {
+      await verifyOTP(formData.email, otp);
+      toast.update(toastId, {
+        render: "OTP verified successfully",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      setStep(3);
+    } catch (error) {
+      toast.update(toastId, {
+        render: error?.message || "Failed OTP verified",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <>
       <Header />
@@ -70,7 +112,7 @@ export default function Register() {
               placeholder="Enter your full name"
               onChange={handleFullNameChange}
               value={formData.fullName}
-              disabled={step === 2}
+              disabled={step >= 2}
             />
           </div>
           <div>
@@ -82,7 +124,7 @@ export default function Register() {
               placeholder="Enter your email"
               onChange={handleEmailChange}
               value={formData.email}
-              disabled={step === 2}
+              disabled={step >= 2}
             />
             {step === 1 ? (
               <button type="button" onClick={handleSendOTP} disabled={loading}>
@@ -94,20 +136,45 @@ export default function Register() {
               </button>
             )}
           </div>
+          {step === 2 && (
+            <div>
+              <label htmlFor="verify-otp">Verify OTP</label>
+              <input
+                type="number"
+                id="verify-otp"
+                placeholder="Enter your OTP here"
+                value={formData.otp}
+                onChange={handleVerifyOTPChange}
+              />
+              <button type="button" onClick={handleOTPVerify}>
+                Verify OTP
+              </button>
+            </div>
+          )}
+          {step === 3 && (
+            <div>
+              <label htmlFor="password">Password</label>
+              <input
+                type={passwordType}
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handlePasswordChange}
+              />
+              <button type="button" onClick={handlePasswordType}>
+                {passwordType === "password"
+                  ? "Show password"
+                  : "Hide password"}
+              </button>
+            </div>
+          )}
+          {step === 3 && (
+            <button type="button" disabled={formData.password.length < 6}>
+              Register
+            </button>
+          )}
         </div>
-        {step === 2 && (
-          <div>
-            <label htmlFor="verify-otp">Verify OTP</label>
-            <input
-              type="number"
-              id="verify-otp"
-              placeholder="Enter your OTP here"
-              value={formData.otp}
-              onChange={handleVerifyOTP}
-            />
-            <button type="button">Verify OTP</button>
-          </div>
-        )}
       </form>
     </>
   );

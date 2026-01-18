@@ -21,3 +21,16 @@ export async function sendOTP(email) {
     throw error.response?.data || error.message;
   }
 }
+
+export async function verifyOTP(email, otp) {
+  try {
+    const response = await api.post("/auth/verify-otp", {
+      email,
+      otp,
+    });
+    const data = response.data;
+    return data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+}
