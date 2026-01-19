@@ -2,6 +2,7 @@ import env from "./config/env.js";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import { connectDB } from "./config/db.js";
 
 await connectDB();
@@ -20,7 +21,7 @@ app.use(
         ? ["https://yourdomain.com", "https://www.yourdomain.com"]
         : ["http://localhost:5173"],
     credentials: true,
-  })
+  }),
 );
 
 app.get("/", (req, res, next) => {
@@ -31,6 +32,7 @@ app.get("/", (req, res, next) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/", userRoutes);
 
 // Error Handling phase
 // 1. Route not found

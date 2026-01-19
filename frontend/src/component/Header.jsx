@@ -5,6 +5,7 @@ export default function Header() {
     <>
       <div>
         <Link to="/">Home</Link>
+        <Link to="/login">Log in</Link>
         <Link to="/register">Register</Link>
       </div>
     </>

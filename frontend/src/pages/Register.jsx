@@ -1,7 +1,9 @@
 import Header from "../component/Header.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sendOTP, verifyOTP } from "../api/authApi.js";
 import { toast } from "react-toastify";
+import { registerUser } from "../api/userApi.js";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [passwordType, setPasswordType] = useState("password");
+  const [countDown, setCountDown] = useState(60);
+
+  const navigate = useNavigate();
 
   function handleFullNameChange(e) {
     setFormData((prev) => ({ ...prev, fullName: e.target.value }));
@@ -37,6 +42,11 @@ export default function Register() {
     } else {
       setPasswordType("password");
     }
+  }
+
+  function handleEditEmailAndName() {
+    setStep(1);
+    setCountDown(60);
   }
 
   async function handleSendOTP() {
@@ -69,6 +79,17 @@ export default function Register() {
     }
   }
 
+  useEffect(() => {
+    if (countDown <= -1) {
+      setStep(1);
+    }
+    if (step !== 2) return;
+    const countDownId = setInterval(() => {
+      setCountDown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(countDownId);
+  }, [countDown, step]);
+
   async function handleOTPVerify() {
     if (otp.length !== 6) {
       toast.error("Please enter OTP length exactly 6");
@@ -97,11 +118,36 @@ export default function Register() {
     }
   }
 
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    const toastId = toast.loading("Registering...");
+    setLoading(true);
+    try {
+      await registerUser({ ...formData, otp });
+      toast.update(toastId, {
+        render: "Registered successfully",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      setTimeout(() => navigate("/login"), 3000);
+    } catch (error) {
+      toast.update(toastId, {
+        render: error?.message || "Failed to register",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <>
       <Header />
       <p>This is Register page</p>
-      <form>
+      <form onSubmit={handleFormSubmit}>
         <div>
           <div>
             <label htmlFor="fullName">Name</label>
@@ -131,7 +177,7 @@ export default function Register() {
                 {loading ? "Sending OTP..." : "Send OTP"}
               </button>
             ) : (
-              <button type="button" onClick={() => setStep(1)}>
+              <button type="button" onClick={handleEditEmailAndName}>
                 Edit Email and Name
               </button>
             )}
@@ -149,6 +195,7 @@ export default function Register() {
               <button type="button" onClick={handleOTPVerify}>
                 Verify OTP
               </button>
+              <button type="button">{countDown}</button>
             </div>
           )}
           {step === 3 && (
@@ -170,7 +217,7 @@ export default function Register() {
             </div>
           )}
           {step === 3 && (
-            <button type="button" disabled={formData.password.length < 6}>
+            <button type="submit" disabled={formData.password.length < 6}>
               Register
             </button>
           )}
