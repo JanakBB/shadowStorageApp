@@ -2,6 +2,7 @@ import Header from "../component/Header.jsx";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { login } from "../api/userApi.js";
 
 export default function LogIn() {
   const [formData, setFormData] = useState({
@@ -32,6 +33,29 @@ export default function LogIn() {
 
   async function handleFormSubmit(e) {
     e.preventDefault();
+
+    const toastId = toast.loading("Logging in...");
+    setLoading(true);
+
+    try {
+      await login(formData);
+      toast.update(toastId, {
+        render: "Log in successfully",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      setTimeout(() => navigate("/"), 3000);
+    } catch (error) {
+      toast.update(toastId, {
+        render: error?.message || "Failed to log in",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

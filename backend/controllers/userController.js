@@ -85,3 +85,16 @@ export const register = async (req, res, next) => {
     }
   }
 };
+
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (password !== user.password) {
+      throw "Enter valid password";
+    }
+    res.status(201).json({ message: "Login successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
