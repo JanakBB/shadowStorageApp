@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { connectDB } from "./config/db.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 await connectDB();
 
@@ -43,14 +44,7 @@ app.use((req, res, next) => {
 });
 
 // 2. Globally catch error
-app.use((error, req, res, next) => {
-  console.log(error.message);
-  res.status(error.statusCode || 500).json({
-    success: false,
-    message: error.message || "Something went wrong",
-    stack: error.stack,
-  });
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

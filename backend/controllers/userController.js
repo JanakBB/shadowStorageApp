@@ -4,112 +4,89 @@ import OTP from "../models/otpModel.js";
 import mongoose, { Types } from "mongoose";
 import Directory from "../models/directoryModel.js";
 import User from "../models/userModel.js";
+import { catchAsync } from "../utils/catchAsync.js";
+import ApiError from "../utils/apiError.js";
 
-export const register = async (req, res, next) => {
-  const validationResult = registerSchema.safeParse(req.body);
+export const register = catchAsync(async (req, res, next) => {
+  const { success, data, error } = registerSchema.safeParse(req.body);
 
-  if (!validationResult.success) {
-    console.log("Validation errors:", validationResult.error.format());
+  if (!success) {
+    const fieldErrors = error.flatten().fieldErrors;
+    const messages = Object.entries(fieldErrors)
+      .map(([field, msgs]) => `${field}: ${msgs.join(", ")}`)
+      .join("; ");
 
-    return res.status(400).json({
-      error: validationResult.error.flatten().fieldErrors,
-    });
+    throw new ApiError(400, messages);
   }
 
-  const { fullName, email, password, otp } = validationResult.data;
+  const { fullName, email, password, otp } = data;
 
   const session = await mongoose.startSession();
 
-  try {
-    await session.withTransaction(async () => {
-      const otpRecord = await OTP.findOne({ email, otp }).session(session);
+  await session.withTransaction(async () => {
+    const otpRecord = await OTP.findOne({ email, otp }).session(session);
 
-      if (!otpRecord) {
-        throw new Error("Invalid or expired OTP");
-      }
-
-      const rootDirId = new Types.ObjectId();
-      const userId = new Types.ObjectId();
-
-      await OTP.deleteOne({ _id: otpRecord._id }).session(session);
-
-      await Directory.create(
-        // create for create and save to DB
-        [
-          {
-            _id: rootDirId,
-            name: `root-${email}`,
-            parentDirId: null,
-            userId: userId,
-          },
-        ],
-        { session },
-      );
-
-      await User.create(
-        [
-          {
-            _id: userId,
-            fullName,
-            email,
-            password, // Use hashed password
-            rootDirId,
-          },
-        ],
-        { session },
-      );
-    });
-
-    await session.endSession();
-
-    res.status(201).json({ message: "Registered successfully" });
-  } catch (error) {
-    console.error("Registration error:", error);
-    await session.endSession();
-
-    if (error.message === "Invalid or expired OTP") {
-      return res.status(400).json({ error: error.message });
+    if (!otpRecord) {
+      throw new ApiError(400, "Invalid or expired OTP");
     }
 
-    if (error.errorLabels?.includes("TransientTransactionError")) {
-      return res.status(503).json({
-        error: "Please try again",
-      });
-    }
+    const rootDirId = new Types.ObjectId();
+    const userId = new Types.ObjectId();
 
-    if (error.code === 121) {
-      return res.status(400).json({ error: "Invalid input" });
-    } else if (error.code === 11000 && error.keyValue?.email) {
-      return res.status(409).json({ error: "Email already exists" });
-    } else {
-      next(error);
-    }
+    await OTP.deleteOne({ _id: otpRecord._id }).session(session);
+
+    await Directory.create(
+      // create for create and save to DB
+      [
+        {
+          _id: rootDirId,
+          name: `root-${email}`,
+          parentDirId: null,
+          userId: userId,
+        },
+      ],
+      { session },
+    );
+
+    await User.create(
+      [
+        {
+          _id: userId,
+          fullName,
+          email,
+          password,
+          rootDirId,
+        },
+      ],
+      { session },
+    );
+  });
+
+  await session.endSession();
+
+  res.status(201).json({ message: "Registered successfully" });
+});
+
+export const login = catchAsync(async (req, res, next) => {
+  console.log(req.body);
+  const { success, data, error } = loginSchema.safeParse(req.body);
+  if (!success) {
+    const fieldErrors = error.flatten().fieldErrors;
+    const messages = Object.entries(fieldErrors)
+      .map(([field, msgs]) => `${field}: ${msgs.join(", ")}`)
+      .join("; ");
+
+    throw new ApiError(400, messages);
   }
-};
 
-export const login = async (req, res, next) => {
-  try {
-    const { success, data, error } = loginSchema.safeParse(req.body);
-    if (!success) {
-      const validationError = Object.fromEntries(
-        Object.entries(error.flatten().fieldErrors).map(([f, m]) => [
-          f,
-          m.join(", "),
-        ]),
-      );
-      throw new Error(validationError.password);
-    }
-    const { email, password } = data;
-    const user = await User.findOne({ email });
-    if (!user) {
-      throw new Error("Invalid email");
-    }
-    const isValidPassword = await user.comparePassword(password);
-    if (!isValidPassword) {
-      throw new Error("Invalid password");
-    }
-    res.status(201).json({ message: "Login successfully" });
-  } catch (error) {
-    next(error);
+  const { email, password } = data;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(400, "Invalid email");
   }
-};
+  const isValidPassword = await user.comparePassword(password);
+  if (!isValidPassword) {
+    throw new ApiError(400, "Invalid password");
+  }
+  res.status(201).json({ message: "Login successfully." });
+});

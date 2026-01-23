@@ -38,9 +38,9 @@ export default function LogIn() {
     setLoading(true);
 
     try {
-      await login(formData);
+      const loginResponse = await login(formData);
       toast.update(toastId, {
-        render: "Log in successfully",
+        render: loginResponse.message,
         type: "success",
         isLoading: false,
         autoClose: 3000,
@@ -89,9 +89,7 @@ export default function LogIn() {
               {passwordType === "password" ? "Show password" : "Hide password"}
             </button>
           </div>
-          <button type="submit" disabled={formData.password.length < 6}>
-            Log in
-          </button>
+          <button type="submit">Log in</button>
         </div>
       </form>
     </>
