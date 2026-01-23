@@ -1,5 +1,5 @@
 import env from "../config/env.js";
-import { registerSchema } from "../validators/authSchema.js";
+import { loginSchema, registerSchema } from "../validators/authSchema.js";
 import OTP from "../models/otpModel.js";
 import mongoose, { Types } from "mongoose";
 import Directory from "../models/directoryModel.js";
@@ -89,7 +89,17 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { success, data, error } = loginSchema.safeParse(req.body);
+    if (!success) {
+      const validationError = Object.fromEntries(
+        Object.entries(error.flatten().fieldErrors).map(([f, m]) => [
+          f,
+          m.join(", "),
+        ]),
+      );
+      throw new Error(validationError.password);
+    }
+    const { email, password } = data;
     const user = await User.findOne({ email });
     if (!user) {
       throw new Error("Invalid email");
