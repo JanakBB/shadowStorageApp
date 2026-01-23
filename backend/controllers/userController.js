@@ -34,6 +34,7 @@ export const register = async (req, res, next) => {
       await OTP.deleteOne({ _id: otpRecord._id }).session(session);
 
       await Directory.create(
+        // create for create and save to DB
         [
           {
             _id: rootDirId,
@@ -90,8 +91,12 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (password !== user.password) {
-      throw "Enter valid password";
+    if (!user) {
+      throw new Error("Invalid email");
+    }
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
+      throw new Error("Invalid password");
     }
     res.status(201).json({ message: "Login successfully" });
   } catch (error) {
