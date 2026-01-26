@@ -5,6 +5,8 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { connectDB } from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
+import cookie from "cookie-parser";
+import directoryRoutes from "./routes/directoryRoutes.js";
 
 await connectDB();
 
@@ -14,6 +16,7 @@ const PORT = env.PORT || 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookie(process.env.COOKIE_SECRET));
 
 app.use(
   cors({
@@ -34,6 +37,7 @@ app.get("/", (req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/", userRoutes);
+app.use("/", directoryRoutes);
 
 // Error Handling phase
 // 1. Route not found

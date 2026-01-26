@@ -68,7 +68,6 @@ export const register = catchAsync(async (req, res, next) => {
 });
 
 export const login = catchAsync(async (req, res, next) => {
-  console.log(req.body);
   const { success, data, error } = loginSchema.safeParse(req.body);
   if (!success) {
     const fieldErrors = error.flatten().fieldErrors;
@@ -88,5 +87,13 @@ export const login = catchAsync(async (req, res, next) => {
   if (!isValidPassword) {
     throw new ApiError(400, "Invalid password");
   }
+
+  res.cookie("userId", user._id, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 1000 * 60,
+    signed: true,
+  });
   res.status(201).json({ message: "Login successfully." });
 });

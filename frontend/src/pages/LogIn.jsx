@@ -89,7 +89,9 @@ export default function LogIn() {
               {passwordType === "password" ? "Show password" : "Hide password"}
             </button>
           </div>
-          <button type="submit">Log in</button>
+          <button type="submit" disabled={formData.password.length < 6}>
+            Log in
+          </button>
         </div>
       </form>
     </>
