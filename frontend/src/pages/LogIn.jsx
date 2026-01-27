@@ -1,7 +1,7 @@
 import Header from "../component/Header.jsx";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/userApi.js";
 
 export default function LogIn() {
@@ -94,6 +94,9 @@ export default function LogIn() {
           </button>
         </div>
       </form>
+      <div>
+        You have not register account. <Link to="/register">Register here</Link>
+      </div>
     </>
   );
 }

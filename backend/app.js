@@ -6,7 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import { connectDB } from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
 import cookie from "cookie-parser";
-import directoryRoutes from "./routes/directoryRoutes.js";
+import homeRoute from "./routes/homeRoutes.js";
 
 await connectDB();
 
@@ -37,7 +37,7 @@ app.get("/", (req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/", userRoutes);
-app.use("/", directoryRoutes);
+app.use("/", homeRoute);
 
 // Error Handling phase
 // 1. Route not found

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { sendOTP, verifyOTP } from "../api/authApi.js";
 import { toast } from "react-toastify";
 import { registerUser } from "../api/userApi.js";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -223,6 +223,9 @@ export default function Register() {
           )}
         </div>
       </form>
+      <div>
+        Already have register. <Link to="/login">Log in</Link>
+      </div>
     </>
   );
 }

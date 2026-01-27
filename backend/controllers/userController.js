@@ -6,6 +6,8 @@ import Directory from "../models/directoryModel.js";
 import User from "../models/userModel.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import ApiError from "../utils/apiError.js";
+import Session from "../models/sessionModel.js";
+import jwt from "jsonwebtoken";
 
 export const register = catchAsync(async (req, res, next) => {
   const { success, data, error } = registerSchema.safeParse(req.body);
@@ -80,6 +82,7 @@ export const login = catchAsync(async (req, res, next) => {
 
   const { email, password } = data;
   const user = await User.findOne({ email });
+
   if (!user) {
     throw new ApiError(400, "Invalid email");
   }
@@ -88,11 +91,32 @@ export const login = catchAsync(async (req, res, next) => {
     throw new ApiError(400, "Invalid password");
   }
 
-  res.cookie("userId", user._id, {
+  const allSessions = await Session.find({ userId: user._id }).sort({
+    createdAt: -1,
+  });
+
+  if (allSessions.length >= 2) {
+    const sessionToDelete = allSessions.slice(1);
+    const sessionToDeleteIds = sessionToDelete.map((session) => session._id);
+    await Session.deleteMany({ _id: { $in: sessionToDeleteIds } });
+  }
+
+  const sessionId = new mongoose.Types.ObjectId();
+  const token = jwt.sign({ sessionId }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+
+  const session = await Session.create({
+    _id: sessionId,
+    userId: user._id,
+    token: token,
+  });
+
+  res.cookie("token", session.token, {
     httpOnly: true,
     secure: true,
     sameSite: "none",
-    maxAge: 1000 * 60,
+    maxAge: 1000 * 60 * 60,
     signed: true,
   });
   res.status(201).json({ message: "Login successfully." });
