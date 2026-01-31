@@ -6,8 +6,7 @@ import Directory from "../models/directoryModel.js";
 import User from "../models/userModel.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import ApiError from "../utils/apiError.js";
-import Session from "../models/sessionModel.js";
-import jwt from "jsonwebtoken";
+import redisClient, { createSessionIndex } from "../config/redis.js";
 
 export const register = catchAsync(async (req, res, next) => {
   const { success, data, error } = registerSchema.safeParse(req.body);
@@ -91,28 +90,28 @@ export const login = catchAsync(async (req, res, next) => {
     throw new ApiError(400, "Invalid password");
   }
 
-  const allSessions = await Session.find({ userId: user._id }).sort({
-    createdAt: -1,
-  });
+  const isIndexReady = await createSessionIndex();
 
-  if (allSessions.length >= 2) {
-    const sessionToDelete = allSessions.slice(1);
-    const sessionToDeleteIds = sessionToDelete.map((session) => session._id);
-    await Session.deleteMany({ _id: { $in: sessionToDeleteIds } });
+  if (isIndexReady) {
+    const allSessions = await redisClient.ft.search(
+      "userIdIdx",
+      `@userId:{${user._id}}`,
+      { RETURN: [] },
+    );
+
+    if (allSessions.total >= 2) {
+      await redisClient.del(allSessions.documents[0].id);
+    }
   }
 
-  const sessionId = new mongoose.Types.ObjectId();
-  const token = jwt.sign({ sessionId }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+  const sessionId = crypto.randomUUID();
+  const redisKey = `session:${sessionId}`;
+  await redisClient.json.set(redisKey, "$", {
+    userId: user._id.toString(),
+    rootDirId: user.rootDirId.toString(),
   });
 
-  const session = await Session.create({
-    _id: sessionId,
-    userId: user._id,
-    token: token,
-  });
-
-  res.cookie("token", session.token, {
+  res.cookie("sid", sessionId, {
     httpOnly: true,
     secure: true,
     sameSite: "none",
