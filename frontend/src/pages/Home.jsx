@@ -9,6 +9,8 @@ export default function Home() {
   const [detailCourse, setDetailCourse] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const effectRan = useRef(false); // Better name
+  const [isProfile, setIsProfile] = useState(false);
+  const [isBlur, setIsBlur] = useState(true);
 
   async function getData() {
     const toastId = toast.loading("Loading...");
@@ -17,6 +19,7 @@ export default function Home() {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       const data = await getHomeData();
       setDetailCourse(true);
+      setIsProfile(true);
       toast.update(toastId, {
         render: data.message,
         type: "success",
@@ -24,6 +27,7 @@ export default function Home() {
         autoClose: 3000,
       });
     } catch (error) {
+      setIsProfile(false);
       toast.update(toastId, {
         render: error?.message || "Failed to load data",
         type: "error",
@@ -45,29 +49,35 @@ export default function Home() {
 
   return (
     <>
-      <Header />
-      <p>This is Home page</p>
-      <p>
-        If you want more details about course you have to log in first. Thank
-        you.
-      </p>
-      {!detailCourse && <Link to={"/login"}>here</Link>}
-      {isLoading && <p>Loading...</p>}
+      <div className="home-container">
+        <Header isProfile={isProfile} setIsBlur={setIsBlur} />
+        {isBlur && (
+          <div>
+            <p>This is Home page</p>
+            <p>
+              If you want more details about course you have to log in first.
+              Thank you.
+            </p>
+            {!detailCourse && <Link to={"/login"}>here</Link>}
+            {isLoading && <p>Loading...</p>}
 
-      {detailCourse && (
-        <div>
-          <p>More Details of Course</p>
-          <p>This is full details of course</p>
-          <p>
-            Learn Full Stack is so important more than only satisfy on frontend.
-            If you only learn frontend you must know how to application looks
-            like but backend give you full path of knowledge about how to
-            frontend act to backend, wondering thing is fronted calls to
-            backend, forwarding backend to frontend with useful data and
-            credential like cookie
-          </p>
-        </div>
-      )}
+            {detailCourse && (
+              <div>
+                <p>More Details of Course</p>
+                <p>This is full details of course</p>
+                <p>
+                  Learn Full Stack is so important more than only satisfy on
+                  frontend. If you only learn frontend you must know how to
+                  application looks like but backend give you full path of
+                  knowledge about how to frontend act to backend, wondering
+                  thing is fronted calls to backend, forwarding backend to
+                  frontend with useful data and credential like cookie
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </>
   );
 }

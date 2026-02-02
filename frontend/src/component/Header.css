@@ -1,0 +1,15 @@
+.popup-border {
+  position: absolute;
+  border: 1px solid black;
+  top: auto;
+  right: 20px;
+}
+popup-container {
+  position: relative;
+}
+
+.button-x {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
