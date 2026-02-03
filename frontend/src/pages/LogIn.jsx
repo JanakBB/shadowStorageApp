@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/userApi.js";
+import { GoogleLogin } from "@react-oauth/google";
+import { loginWithGoogle } from "../api/loginWithGoogleApi.js";
 
 export default function LogIn() {
   const [formData, setFormData] = useState({
@@ -58,12 +60,41 @@ export default function LogIn() {
     }
   }
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const toastId = toast.loading("Login with google...");
+    setLoading(true);
+    try {
+      const data = await loginWithGoogle(credentialResponse.credential);
+      toast.update(toastId, {
+        render: data.message,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      setTimeout(() => navigate("/"), 3000);
+    } catch (error) {
+      toast.update(toastId, {
+        render: error?.message || "Failed to login with google",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.loading("Google authentication failed.");
+  };
+
   return (
     <>
       <Header />
       <p>This is Log in page</p>
       <form onSubmit={handleFormSubmit}>
-        <div>
+        <fieldset>
+          <legend>Personalia:</legend>
           <div>
             <label htmlFor="email">Email</label>
             <input
@@ -90,10 +121,19 @@ export default function LogIn() {
             </button>
           </div>
           <button type="submit" disabled={formData.password.length < 6}>
-            Log in
+            {loading ? "Logging in..." : "Log in"}
           </button>
-        </div>
+        </fieldset>
       </form>
+      <fieldset>
+        <legend>Or continue with</legend>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          type="icon"
+          size="large"
+        />
+      </fieldset>
       <div>
         You have not register account. <Link to="/register">Register here</Link>
       </div>

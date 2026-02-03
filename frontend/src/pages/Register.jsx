@@ -4,6 +4,8 @@ import { sendOTP, verifyOTP } from "../api/authApi.js";
 import { toast } from "react-toastify";
 import { registerUser } from "../api/userApi.js";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { loginWithGoogle } from "../api/loginWithGoogleApi.js";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -143,12 +145,41 @@ export default function Register() {
     }
   }
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const toastId = toast.loading("Login with google...");
+    setLoading(true);
+    try {
+      const data = await loginWithGoogle(credentialResponse.credential);
+      toast.update(toastId, {
+        render: data.message,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      setTimeout(() => navigate("/"), 3000);
+    } catch (error) {
+      toast.update(toastId, {
+        render: error?.message || "Failed to login with google",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.loading("Google authentication failed.");
+  };
+
   return (
     <>
       <Header />
       <p>This is Register page</p>
       <form onSubmit={handleFormSubmit}>
-        <div>
+        <fieldset>
+          <legend>Personalia:</legend>
           <div>
             <label htmlFor="fullName">Name</label>
             <input
@@ -221,8 +252,17 @@ export default function Register() {
               Register
             </button>
           )}
-        </div>
+        </fieldset>
       </form>
+      <fieldset>
+        <legend>Or continue with</legend>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          type="icon"
+          size="large"
+        />
+      </fieldset>
       <div>
         Already have register. <Link to="/login">Log in</Link>
       </div>

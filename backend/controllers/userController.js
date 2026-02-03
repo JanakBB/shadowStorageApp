@@ -22,48 +22,55 @@ export const register = catchAsync(async (req, res, next) => {
 
   const { fullName, email, password, otp } = data;
 
-  const session = await mongoose.startSession();
+  const user = await User.findOne({ email }).select("-__v");
+  if (user) {
+    user.fullName = fullName;
+    user.password = password;
+    await user.save();
+  } else {
+    const session = await mongoose.startSession();
 
-  await session.withTransaction(async () => {
-    const otpRecord = await OTP.findOne({ email, otp }).session(session);
+    await session.withTransaction(async () => {
+      const otpRecord = await OTP.findOne({ email, otp }).session(session);
 
-    if (!otpRecord) {
-      throw new ApiError(400, "Invalid or expired OTP");
-    }
+      if (!otpRecord) {
+        throw new ApiError(400, "Invalid or expired OTP");
+      }
 
-    const rootDirId = new Types.ObjectId();
-    const userId = new Types.ObjectId();
+      const rootDirId = new Types.ObjectId();
+      const userId = new Types.ObjectId();
 
-    await OTP.deleteOne({ _id: otpRecord._id }).session(session);
+      await OTP.deleteOne({ _id: otpRecord._id }).session(session);
 
-    await Directory.create(
-      // create for create and save to DB
-      [
-        {
-          _id: rootDirId,
-          name: `root-${email}`,
-          parentDirId: null,
-          userId: userId,
-        },
-      ],
-      { session },
-    );
+      await Directory.create(
+        // create for create and save to DB
+        [
+          {
+            _id: rootDirId,
+            name: `root-${email}`,
+            parentDirId: null,
+            userId: userId,
+          },
+        ],
+        { session },
+      );
 
-    await User.create(
-      [
-        {
-          _id: userId,
-          fullName,
-          email,
-          password,
-          rootDirId,
-        },
-      ],
-      { session },
-    );
-  });
+      await User.create(
+        [
+          {
+            _id: userId,
+            fullName,
+            email,
+            password,
+            rootDirId,
+          },
+        ],
+        { session },
+      );
+    });
 
-  await session.endSession();
+    await session.endSession();
+  }
 
   res.status(201).json({ message: "Registered successfully" });
 });
