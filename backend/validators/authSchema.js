@@ -19,6 +19,18 @@ export const loginSchema = z.object({
     .max(50, "Password is too long"),
 });
 
+export const resetPasswordSchema = z.object({
+  email: z.email("Please enter a valid email"),
+  newPassword: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password is too long"),
+  confirmPassword: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password is too long"),
+});
+
 export const registerSchema = loginSchema.extend({
   fullName: z
     .string()

@@ -1,5 +1,9 @@
 import env from "../config/env.js";
-import { loginSchema, registerSchema } from "../validators/authSchema.js";
+import {
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "../validators/authSchema.js";
 import OTP from "../models/otpModel.js";
 import mongoose, { Types } from "mongoose";
 import Directory from "../models/directoryModel.js";
@@ -126,4 +130,54 @@ export const login = catchAsync(async (req, res, next) => {
     signed: true,
   });
   res.status(201).json({ message: "Login successfully." });
+});
+
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const { success, data, error } = resetPasswordSchema.safeParse(req.body);
+  if (!success) {
+    const fieldErrors = error.flatten().fieldErrors;
+    const messages = Object.entries(fieldErrors)
+      .map(([field, msgs]) => `${field}: ${msgs.join(", ")}`)
+      .join("; ");
+
+    throw new ApiError(400, messages);
+  }
+
+  const { email, newPassword, confirmPassword } = data;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(400, "Invalid email");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new ApiError(400, "Invalid password");
+  }
+
+  if (user) {
+    user.password = confirmPassword;
+    await user.save();
+  }
+
+  const isIndexReady = await createSessionIndex();
+
+  if (isIndexReady) {
+    const allSessions = await redisClient.ft.search(
+      "userIdIdx",
+      `@userId:{${user._id}}`,
+      { RETURN: [] },
+    );
+
+    if (allSessions.total > 0) {
+      for (const doc of allSessions.documents) {
+        await redisClient.del(doc.id);
+      }
+    }
+  }
+
+  const signedCookie = req.signedCookies;
+  const sid = signedCookie.sid;
+  res.clearCookie("sid");
+
+  res.status(201).json({ message: "Password reset successfully." });
 });

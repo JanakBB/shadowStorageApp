@@ -119,6 +119,7 @@ export default function LogIn() {
             <button type="button" onClick={handlePasswordType}>
               {passwordType === "password" ? "Show password" : "Hide password"}
             </button>
+            <Link to="/forget-password">Forget password?</Link>
           </div>
           <button type="submit" disabled={formData.password.length < 6}>
             {loading ? "Logging in..." : "Log in"}

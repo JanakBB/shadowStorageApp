@@ -19,3 +19,12 @@ export async function login(formData) {
     throw error.response?.data || error.message;
   }
 }
+export async function resetPassword(formData) {
+  try {
+    const response = await api.post("/user/reset-password", formData);
+    const data = response.data;
+    return data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+}
