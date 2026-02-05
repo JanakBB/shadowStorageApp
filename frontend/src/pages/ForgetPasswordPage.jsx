@@ -16,6 +16,7 @@ export default function ForgetPassword() {
   const [loading, setLoading] = useState(false);
   const [newPasswordType, setNewPasswordType] = useState("password");
   const [confirmPasswordType, setConfirmPasswordType] = useState("password");
+  const [isWheel, setIsWheel] = useState(true);
 
   const navigate = useNavigate();
 
@@ -101,93 +102,108 @@ export default function ForgetPassword() {
   };
 
   return (
-    <>
-      <Header />
-      <p>This is forget password page</p>
-      <form onSubmit={handleFormSubmit}>
-        <fieldset>
-          <legend>Reset your password:</legend>
-          <div>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-              onChange={handleEmailChange}
-              value={formData.email}
-            />
-          </div>
-          <div>
-            <label htmlFor="newPassword">New password</label>
-            <input
-              type={newPasswordType}
-              id="newPassword"
-              name="newPassword"
-              placeholder="Enter your new password"
-              value={formData.newPassword}
-              onChange={handleNewPasswordChange}
-            />
-            <button type="button" onClick={handleNewPasswordType}>
-              {newPasswordType === "password"
-                ? "Show password"
-                : "Hide password"}
-            </button>
-          </div>
-          <div>
-            <label htmlFor="confirmPassword">Confirm new password</label>
-            <input
-              type={confirmPasswordType}
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="Confirm your new password"
-              value={formData.confirmPassword}
-              onChange={handleConfirmPasswordChange}
-            />
-            <button type="button" onClick={handleConfirmPasswordType}>
-              {confirmPasswordType === "password"
-                ? "Show password"
-                : "Hide password"}
-            </button>
-            <button>
-              {!(
-                formData.newPassword.length >= 6 &&
-                formData.confirmPassword.length >= 6 &&
-                formData.newPassword === formData.confirmPassword
-              )
-                ? "❌"
-                : "✅"}
-            </button>
-          </div>
-          <button
-            type="submit"
-            disabled={
-              !(
-                formData.newPassword.length >= 6 &&
-                formData.confirmPassword.length >= 6 &&
-                formData.newPassword === formData.confirmPassword
-              )
-            }
-          >
-            {loading ? "Resetting new password..." : "Reset your password"}
-          </button>
-        </fieldset>
-      </form>
-      <fieldset>
-        <legend>Or continue with</legend>
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          type="icon"
-          size="large"
+    <div className="main-container">
+      {isWheel && (
+        <video
+          className="video-content"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src="./fullstack.mp4"
         />
-      </fieldset>
-      <div>
-        You have not register account. <Link to="/register">Register here</Link>
+      )}
+      <div className="content-container">
+        <div>
+          <Header setIsWheel={setIsWheel} />
+        </div>
+        <p>This is forget password page for building your core 🧠</p>
+        <form onSubmit={handleFormSubmit}>
+          <fieldset>
+            <legend>Reset your password:</legend>
+            <div>
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                onChange={handleEmailChange}
+                value={formData.email}
+              />
+            </div>
+            <div>
+              <label htmlFor="newPassword">New password</label>
+              <input
+                type={newPasswordType}
+                id="newPassword"
+                name="newPassword"
+                placeholder="Enter your new password"
+                value={formData.newPassword}
+                onChange={handleNewPasswordChange}
+              />
+              <button type="button" onClick={handleNewPasswordType}>
+                {newPasswordType === "password"
+                  ? "Show password"
+                  : "Hide password"}
+              </button>
+            </div>
+            <div>
+              <label htmlFor="confirmPassword">Confirm new password</label>
+              <input
+                type={confirmPasswordType}
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your new password"
+                value={formData.confirmPassword}
+                onChange={handleConfirmPasswordChange}
+              />
+              <button type="button" onClick={handleConfirmPasswordType}>
+                {confirmPasswordType === "password"
+                  ? "Show password"
+                  : "Hide password"}
+              </button>
+              <button>
+                {!(
+                  formData.newPassword.length >= 6 &&
+                  formData.confirmPassword.length >= 6 &&
+                  formData.newPassword === formData.confirmPassword
+                )
+                  ? "❌"
+                  : "✅"}
+              </button>
+            </div>
+            <button
+              type="submit"
+              disabled={
+                !(
+                  formData.newPassword.length >= 6 &&
+                  formData.confirmPassword.length >= 6 &&
+                  formData.newPassword === formData.confirmPassword
+                )
+              }
+            >
+              {loading ? "Resetting new password..." : "Reset your password"}
+            </button>
+          </fieldset>
+        </form>
+        <fieldset>
+          <legend>Or continue with</legend>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            type="icon"
+            size="large"
+          />
+        </fieldset>
+        <div>
+          You have not register account.{" "}
+          <Link to="/register">Register here</Link>
+        </div>
+        <div>
+          Already have register. <Link to="/login">Log in</Link>
+        </div>
       </div>
-      <div>
-        Already have register. <Link to="/login">Log in</Link>
-      </div>
-    </>
+    </div>
   );
 }

@@ -14,6 +14,7 @@ export default function LogIn() {
 
   const [loading, setLoading] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
+  const [isWheel, setIsWheel] = useState(true);
 
   const navigate = useNavigate();
 
@@ -89,55 +90,72 @@ export default function LogIn() {
   };
 
   return (
-    <>
-      <Header />
-      <p>This is Log in page</p>
-      <form onSubmit={handleFormSubmit}>
-        <fieldset>
-          <legend>Personalia:</legend>
-          <div>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-              onChange={handleEmailChange}
-              value={formData.email}
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Password</label>
-            <input
-              type={passwordType}
-              id="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handlePasswordChange}
-            />
-            <button type="button" onClick={handlePasswordType}>
-              {passwordType === "password" ? "Show password" : "Hide password"}
-            </button>
-            <Link to="/forget-password">Forget password?</Link>
-          </div>
-          <button type="submit" disabled={formData.password.length < 6}>
-            {loading ? "Logging in..." : "Log in"}
-          </button>
-        </fieldset>
-      </form>
-      <fieldset>
-        <legend>Or continue with</legend>
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          type="icon"
-          size="large"
+    <div className="main-container">
+      {isWheel && (
+        <video
+          className="video-content"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src="./fundamental.mp4"
         />
-      </fieldset>
-      <div>
-        You have not register account. <Link to="/register">Register here</Link>
+      )}
+      <div className="content-container">
+        <div>
+          <Header setIsWheel={setIsWheel} />
+        </div>
+        <p>This is Log in page for learning more 📖</p>
+        <form onSubmit={handleFormSubmit}>
+          <fieldset>
+            <legend>Personalia:</legend>
+            <div>
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                onChange={handleEmailChange}
+                value={formData.email}
+              />
+            </div>
+            <div>
+              <label htmlFor="password">Password</label>
+              <input
+                type={passwordType}
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handlePasswordChange}
+              />
+              <button type="button" onClick={handlePasswordType}>
+                {passwordType === "password"
+                  ? "Show password"
+                  : "Hide password"}
+              </button>
+              <Link to="/forget-password">Forget password?</Link>
+            </div>
+            <button type="submit" disabled={formData.password.length < 6}>
+              {loading ? "Logging in..." : "Log in"}
+            </button>
+          </fieldset>
+        </form>
+        <fieldset>
+          <legend>Or continue with</legend>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            type="icon"
+            size="large"
+          />
+        </fieldset>
+        <div>
+          You have not register account.{" "}
+          <Link to="/register">Register here</Link>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

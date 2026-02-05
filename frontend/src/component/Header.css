@@ -1,15 +1,62 @@
 .popup-border {
   position: absolute;
-  border: 1px solid black;
-  top: auto;
-  right: 20px;
+  top: 64px;
+  right: 0;
 }
 popup-container {
   position: relative;
+}
+
+.popup {
+  background-color: #091a23;
+  height: 20%;
+  width: 20vh;
+
+  border-radius: 10px;
 }
 
 .button-x {
   position: absolute;
   top: 5px;
   right: 5px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.header-container a {
+  text-decoration: none;
+  font-weight: bold;
+  color: white;
+  padding: 2px;
+  /* margin-inline: 10px; */
+}
+
+.header-container a:hover {
+  color: #ffd814;
+}
+
+header-main {
+  position: relative;
+}
+
+.O {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.half-circle {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  border-radius: 50%;
+  background: linear-gradient(180deg, white 50%, black 50%);
 }

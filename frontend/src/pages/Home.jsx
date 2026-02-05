@@ -11,6 +11,7 @@ export default function Home() {
   const effectRan = useRef(false); // Better name
   const [isProfile, setIsProfile] = useState(false);
   const [isBlur, setIsBlur] = useState(true);
+  const [isWheel, setIsWheel] = useState(true);
 
   async function getData() {
     const toastId = toast.loading("Loading...");
@@ -48,36 +49,54 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <div className="home-container">
-        <Header isProfile={isProfile} setIsBlur={setIsBlur} />
-        {isBlur && (
+    <div className="main-container">
+      {isWheel && (
+        <video
+          className="video-content"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src="./frontEndBackEnd.mp4"
+        />
+      )}
+      <div className="content-container">
+        <div className="home-container">
           <div>
-            <p>This is Home page</p>
-            <p>
-              If you want more details about course you have to log in first.
-              Thank you.
-            </p>
-            {!detailCourse && <Link to={"/login"}>here</Link>}
-            {isLoading && <p>Loading...</p>}
-
-            {detailCourse && (
-              <div>
-                <p>More Details of Course</p>
-                <p>This is full details of course</p>
-                <p>
-                  Learn Full Stack is so important more than only satisfy on
-                  frontend. If you only learn frontend you must know how to
-                  application looks like but backend give you full path of
-                  knowledge about how to frontend act to backend, wondering
-                  thing is fronted calls to backend, forwarding backend to
-                  frontend with useful data and credential like cookie
-                </p>
-              </div>
-            )}
+            <Header
+              isProfile={isProfile}
+              setIsBlur={setIsBlur}
+              setIsWheel={setIsWheel}
+            />
           </div>
-        )}
+          {isBlur && (
+            <div>
+              <p>This is Home page</p>
+              <p>
+                If you want more details about course you have to log in first.
+                Thank you.
+              </p>
+              {!detailCourse && <Link to={"/login"}>here</Link>}
+              {isLoading && <p>Loading...</p>}
+
+              {detailCourse && (
+                <div>
+                  <p>More Details of Course</p>
+                  <p>This is full details of course</p>
+                  <p>
+                    Learn Full Stack is so important more than only satisfy on
+                    frontend. If you only learn frontend you must know how to
+                    application looks like but backend give you full path of
+                    knowledge about how to frontend act to backend, wondering
+                    thing is fronted calls to backend, forwarding backend to
+                    frontend with useful data and credential like cookie
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </>
+    </div>
   );
 }

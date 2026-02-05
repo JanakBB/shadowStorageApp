@@ -19,6 +19,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [passwordType, setPasswordType] = useState("password");
   const [countDown, setCountDown] = useState(60);
+  const [isWheel, setIsWheel] = useState(true);
 
   const navigate = useNavigate();
 
@@ -174,98 +175,120 @@ export default function Register() {
   };
 
   return (
-    <>
-      <Header />
-      <p>This is Register page</p>
-      <form onSubmit={handleFormSubmit}>
-        <fieldset>
-          <legend>Personalia:</legend>
-          <div>
-            <label htmlFor="fullName">Name</label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              placeholder="Enter your full name"
-              onChange={handleFullNameChange}
-              value={formData.fullName}
-              disabled={step >= 2}
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-              onChange={handleEmailChange}
-              value={formData.email}
-              disabled={step >= 2}
-            />
-            {step === 1 ? (
-              <button type="button" onClick={handleSendOTP} disabled={loading}>
-                {loading ? "Sending OTP..." : "Send OTP"}
-              </button>
-            ) : (
-              <button type="button" onClick={handleEditEmailAndName}>
-                Edit Email and Name
-              </button>
-            )}
-          </div>
-          {step === 2 && (
-            <div>
-              <label htmlFor="verify-otp">Verify OTP</label>
-              <input
-                type="number"
-                id="verify-otp"
-                placeholder="Enter your OTP here"
-                value={formData.otp}
-                onChange={handleVerifyOTPChange}
-              />
-              <button type="button" onClick={handleOTPVerify}>
-                Verify OTP
-              </button>
-              <button type="button">{countDown}</button>
-            </div>
-          )}
-          {step === 3 && (
-            <div>
-              <label htmlFor="password">Password</label>
-              <input
-                type={passwordType}
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handlePasswordChange}
-              />
-              <button type="button" onClick={handlePasswordType}>
-                {passwordType === "password"
-                  ? "Show password"
-                  : "Hide password"}
-              </button>
-            </div>
-          )}
-          {step === 3 && (
-            <button type="submit" disabled={formData.password.length < 6}>
-              Register
-            </button>
-          )}
-        </fieldset>
-      </form>
-      <fieldset>
-        <legend>Or continue with</legend>
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          type="icon"
-          size="large"
+    <div className="main-container">
+      {isWheel && (
+        <video
+          className="video-content"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src="./fullstack.mp4"
         />
-      </fieldset>
-      <div>
-        Already have register. <Link to="/login">Log in</Link>
+      )}
+      <div className="content-container">
+        <div>
+          <Header setIsWheel={setIsWheel} />
+        </div>
+        <div>
+          <p>
+            This is Register page for becoming 🚀 full stack web developer 💻😍
+          </p>
+          <form onSubmit={handleFormSubmit}>
+            <fieldset>
+              <legend>Personalia:</legend>
+              <div>
+                <label htmlFor="fullName">Name</label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  placeholder="Enter your full name"
+                  onChange={handleFullNameChange}
+                  value={formData.fullName}
+                  disabled={step >= 2}
+                />
+              </div>
+              <div>
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  onChange={handleEmailChange}
+                  value={formData.email}
+                  disabled={step >= 2}
+                />
+                {step === 1 ? (
+                  <button
+                    type="button"
+                    onClick={handleSendOTP}
+                    disabled={loading}
+                  >
+                    {loading ? "Sending OTP..." : "Send OTP"}
+                  </button>
+                ) : (
+                  <button type="button" onClick={handleEditEmailAndName}>
+                    Edit Email and Name
+                  </button>
+                )}
+              </div>
+              {step === 2 && (
+                <div>
+                  <label htmlFor="verify-otp">Verify OTP</label>
+                  <input
+                    type="number"
+                    id="verify-otp"
+                    placeholder="Enter your OTP here"
+                    value={formData.otp}
+                    onChange={handleVerifyOTPChange}
+                  />
+                  <button type="button" onClick={handleOTPVerify}>
+                    Verify OTP
+                  </button>
+                  <button type="button">{countDown}</button>
+                </div>
+              )}
+              {step === 3 && (
+                <div>
+                  <label htmlFor="password">Password</label>
+                  <input
+                    type={passwordType}
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handlePasswordChange}
+                  />
+                  <button type="button" onClick={handlePasswordType}>
+                    {passwordType === "password"
+                      ? "Show password"
+                      : "Hide password"}
+                  </button>
+                </div>
+              )}
+              {step === 3 && (
+                <button type="submit" disabled={formData.password.length < 6}>
+                  Register
+                </button>
+              )}
+            </fieldset>
+          </form>
+          <fieldset>
+            <legend>Or continue with</legend>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              type="icon"
+              size="large"
+            />
+          </fieldset>
+          <div>
+            Already have register. <Link to="/login">Log in</Link>
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

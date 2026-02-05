@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import "./Header.css";
 
-export default function Header({ isProfile, setIsBlur }) {
+export default function Header({ isProfile, setIsBlur, setIsWheel }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const popupRef = useRef(null);
   const profileButtonRef = useRef(null);
@@ -46,28 +46,41 @@ export default function Header({ isProfile, setIsBlur }) {
     setIsPopupOpen(false);
     setIsBlur(true);
   };
+
+  const handleWheelToggle = () => {
+    setIsWheel((prev) => !prev);
+  };
   return (
     <>
-      <div>
-        <Link to="/">Home</Link>
-        <Link to="/login">Log in</Link>
-        <Link to="/register">Register</Link>
-        {isProfile && (
-          <Link ref={profileButtonRef} onClick={togglePopup}>
-            Profile
-          </Link>
-        )}
-        {isPopupOpen && (
-          <div ref={popupRef} className="popup-border popup-container">
-            <div>
-              <h2>Profile Details</h2>
-              <p>Your profile content goes here...</p>
+      <div className="header-main">
+        <div
+          onClick={handleWheelToggle}
+          className="O"
+          title="Wheel toggle hide/show"
+        >
+          <div class="half-circle"></div>
+        </div>
+        <div className="header-container">
+          <Link to="/">Home</Link>
+          <Link to="/login">Log in</Link>
+          <Link to="/register">Register</Link>
+          {isProfile && (
+            <Link ref={profileButtonRef} onClick={togglePopup}>
+              Profile
+            </Link>
+          )}
+          {isPopupOpen && (
+            <div ref={popupRef} className="popup-border popup-container">
+              <div className="popup">
+                <h2>Profile Details</h2>
+                <p>Your profile content goes here...</p>
+              </div>
+              <button className="button-x" onClick={closePopup}>
+                X
+              </button>
             </div>
-            <button className="button-x" onClick={closePopup}>
-              X
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );
